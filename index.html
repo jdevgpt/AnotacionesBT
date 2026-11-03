@@ -3,25 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1f2a37">
-<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
 <title>Anotaciones PT/CD</title>
 <style>
 :root{
-  --bg:#edf0f4; --surface:#ffffff; --text:#16202b; --muted:#566272; --line:#d3d9e1;
-  --brand:#1f2a37; --brand-text:#ffffff; --focus:#1f6fd1;
-  --def:#d63333; --def-bg:#fde8e8; --def-ink:#9b1c1c;
-  --sec:#1f6fd1; --sec-bg:#e3eefc; --sec-ink:#134a95;
-  --pen:#e69500; --pen-bg:#fff0d0; --pen-ink:#8a5200;
-}
-@media (prefers-color-scheme:dark){
-  :root{
-    --bg:#10161d; --surface:#1b242e; --text:#eef2f6; --muted:#9fb0c1; --line:#31404f;
-    --brand:#0b1016; --brand-text:#ffffff; --focus:#6fa8f5;
-    --def:#ef5b5b; --def-bg:#3a1d1f; --def-ink:#ffb4b4;
-    --sec:#5b9bf0; --sec-bg:#17283d; --sec-ink:#b5d3fb;
-    --pen:#f2a91f; --pen-bg:#3a2d12; --pen-ink:#ffd98a;
-  }
+  --bg:#ffffff; --soft:#f3f4f6; --line:#e5e7eb; --text:#1f2937; --muted:#6b7280;
+  --orange:#f97316; --orange-d:#c2410c; --orange-bg:#fff4ea;
+  --wa:#15803d; --wa-bg:#e8f6ed;
+  --def:#dc2626; --def-bg:#fef2f2; --def-ink:#991b1b;
+  --sec:#2563eb; --sec-bg:#eff6ff; --sec-ink:#1e40af;
+  --pen:#7c3aed; --pen-bg:#f5f3ff; --pen-ink:#5b21b6;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -31,44 +23,58 @@ body{
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
 button,input,textarea{font:inherit;color:inherit}
-:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+:focus-visible{outline:3px solid var(--orange); outline-offset:2px}
 
+/* Cabecera */
 .top{
-  background:var(--brand); color:var(--brand-text);
-  padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px;
+  background:var(--bg); border-bottom:3px solid var(--orange);
+  padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 10px;
   position:sticky; top:0; z-index:5;
   display:flex; align-items:center; gap:10px;
 }
-.top h1{margin:0; font-size:20px; font-weight:700; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.top .iconbtn{
-  background:rgba(255,255,255,.14); color:#fff; border:0; border-radius:10px;
-  min-height:44px; padding:0 14px; font-weight:600; cursor:pointer;
+.top h1{margin:0; font-size:20px; font-weight:800; flex:1; min-width:0; overflow-wrap:anywhere; line-height:1.2}
+.top h1 small{display:block; font-size:12px; font-weight:600; color:var(--muted)}
+.back{
+  background:var(--soft); border:0; border-radius:10px; min-height:44px; padding:0 14px;
+  font-weight:700; cursor:pointer; color:var(--text);
 }
-.wrap{max-width:640px; margin:0 auto; padding:16px 14px 40px}
+.wrap{max-width:640px; margin:0 auto; padding:14px 14px 40px}
 
-.card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:14px}
+/* Tarjetas y formularios */
+.card{background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:14px}
+.card.soft{background:var(--soft); border-color:var(--soft)}
 .card h2{margin:0 0 10px; font-size:17px}
+.card h2::before{content:""; display:inline-block; width:4px; height:16px; background:var(--orange); border-radius:2px; margin-right:8px; vertical-align:-2px}
 label.field{display:block; font-size:14px; font-weight:600; color:var(--muted); margin-bottom:10px}
-label.field input,label.field textarea{
-  display:block; width:100%; margin-top:4px; padding:12px; font-size:16px; font-weight:400; color:var(--text);
-  background:var(--bg); border:1.5px solid var(--line); border-radius:10px;
+label.field input,label.field textarea,.search{
+  display:block; width:100%; margin-top:4px; padding:12px; font-size:16px; font-weight:500; color:var(--text);
+  background:#fff; border:2px solid #6b7280; border-radius:10px;
 }
+label.field input::placeholder,.search::placeholder{color:#6b7280; font-weight:400}
+label.field input:focus,label.field textarea:focus,.search:focus{outline:3px solid var(--orange-bg); border-color:var(--orange-d)}
 label.field textarea{min-height:70px; resize:vertical}
+.search{margin:0 0 12px}
 .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
 
+/* Botones */
 .btn{
-  display:block; width:100%; min-height:50px; border-radius:10px; border:1.5px solid var(--line);
-  background:var(--surface); font-weight:700; cursor:pointer; padding:0 14px;
+  display:flex; align-items:center; justify-content:center; gap:8px; width:100%; min-height:50px;
+  border-radius:10px; border:1.5px solid var(--line); background:var(--bg); font-weight:700; cursor:pointer; padding:0 14px;
 }
-.btn.primary{background:var(--brand); color:var(--brand-text); border-color:var(--brand)}
-.btn.small{display:inline-block; width:auto; min-height:42px; font-size:14px; font-weight:600}
-.btn.danger{color:var(--def-ink); border-color:var(--def)}
+.btn.primary{background:var(--orange-d); color:#fff; border-color:var(--orange-d)}
+.btn.wa{background:var(--wa); color:#fff; border-color:var(--wa)}
+.btn.small{display:inline-flex; width:auto; min-height:42px; font-size:14px; font-weight:600}
+.btn.danger{color:var(--def-ink); border-color:#f3b4b4}
 .btn-row{display:flex; gap:8px; flex-wrap:wrap}
+.wa-mini{
+  background:var(--wa); color:#fff; border:0; border-radius:10px; min-height:44px; padding:0 14px;
+  font-weight:700; font-size:14px; cursor:pointer; white-space:nowrap;
+}
 
-/* Categorías */
-.cats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:2px 0 12px}
-.cats legend{font-size:14px; font-weight:600; color:var(--muted); padding:0; margin-bottom:4px}
+/* Clasificación */
 fieldset.catset{border:0; padding:0; margin:0 0 4px; min-width:0}
+.catset legend{font-size:14px; font-weight:600; color:var(--muted); padding:0; margin-bottom:4px}
+.cats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:2px 0 12px}
 .cat{position:relative}
 .cat input{position:absolute; opacity:0; inset:0; width:100%; height:100%; margin:0; cursor:pointer}
 .cat span{
@@ -76,41 +82,49 @@ fieldset.catset{border:0; padding:0; margin:0 0 4px; min-width:0}
   min-height:58px; padding:6px; border-radius:10px; font-weight:700; font-size:14px; line-height:1.2;
   border:2px solid transparent;
 }
-.cat.def span{background:var(--def-bg); color:var(--def-ink); border-color:var(--def-bg)}
-.cat.sec span{background:var(--sec-bg); color:var(--sec-ink); border-color:var(--sec-bg)}
-.cat.pen span{background:var(--pen-bg); color:var(--pen-ink); border-color:var(--pen-bg)}
+.cat.def span{background:var(--def-bg); color:var(--def-ink); border-color:#fbd0d0}
+.cat.sec span{background:var(--sec-bg); color:var(--sec-ink); border-color:#c9dcfb}
+.cat.pen span{background:var(--pen-bg); color:var(--pen-ink); border-color:#dccffa}
 .cat.def input:checked + span{background:var(--def); color:#fff; border-color:var(--def)}
 .cat.sec input:checked + span{background:var(--sec); color:#fff; border-color:var(--sec)}
-.cat.pen input:checked + span{background:var(--pen); color:#1b1200; border-color:var(--pen)}
-.cat input:focus-visible + span{outline:3px solid var(--focus); outline-offset:2px}
+.cat.pen input:checked + span{background:var(--pen); color:#fff; border-color:var(--pen)}
+.cat input:focus-visible + span{outline:3px solid var(--orange); outline-offset:2px}
 
 /* Filtros */
 .chips{display:flex; gap:8px; overflow-x:auto; padding:2px 0 12px; scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
 .chip{
   flex:0 0 auto; min-height:42px; padding:0 14px; border-radius:21px; border:1.5px solid var(--line);
-  background:var(--surface); font-weight:600; font-size:14px; cursor:pointer;
+  background:var(--bg); font-weight:600; font-size:14px; cursor:pointer;
 }
-.chip[aria-pressed="true"]{background:var(--brand); color:var(--brand-text); border-color:var(--brand)}
+.chip[aria-pressed="true"]{background:var(--orange-bg); border-color:var(--orange); color:var(--orange-d)}
 
-/* Badges */
+/* Etiquetas */
 .badge{display:inline-block; padding:3px 9px; border-radius:12px; font-size:13px; font-weight:700}
 .badge.def{background:var(--def-bg); color:var(--def-ink)}
 .badge.sec{background:var(--sec-bg); color:var(--sec-ink)}
 .badge.pen{background:var(--pen-bg); color:var(--pen-ink)}
 .badges{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px}
 
-/* Lista de PT */
+/* Resumen */
+.stats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px}
+.stats div{background:var(--soft); border-radius:10px; padding:8px 10px}
+.stats b{display:block; font-size:22px; line-height:1.1; color:var(--orange-d)}
+.stats span{font-size:12px; color:var(--muted); font-weight:600}
+
+/* Lista de centros */
 .ptitem{
-  display:block; width:100%; text-align:left; background:var(--surface); border:1px solid var(--line);
-  border-radius:12px; padding:14px; margin-bottom:10px; cursor:pointer;
+  display:flex; align-items:stretch; gap:8px; background:var(--bg); border:1px solid var(--line);
+  border-left:6px solid var(--orange); border-radius:12px; padding:10px 10px 10px 12px; margin-bottom:10px;
 }
-.ptitem .name{font-size:18px; font-weight:700}
+.ptitem .open{flex:1; min-width:0; text-align:left; background:none; border:0; padding:0; cursor:pointer}
+.ptitem .name{font-size:18px; font-weight:800; overflow-wrap:anywhere}
 .ptitem .meta{font-size:13px; color:var(--muted)}
+.ptitem .wa-mini{align-self:center}
 
 /* Anotaciones */
 .note{
-  background:var(--surface); border:1px solid var(--line); border-left-width:8px;
+  background:var(--bg); border:1px solid var(--line); border-left-width:8px;
   border-radius:12px; padding:12px 12px 10px; margin-bottom:10px;
 }
 .note.def{border-left-color:var(--def)}
@@ -119,23 +133,22 @@ fieldset.catset{border:0; padding:0; margin:0 0 4px; min-width:0}
 .note .head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px}
 .note .apoyo{font-size:19px; font-weight:800}
 .note .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:8px}
-.note .grid div{background:var(--bg); border-radius:8px; padding:6px 8px; min-width:0}
+.note .grid div{background:var(--soft); border-radius:8px; padding:6px 8px; min-width:0}
 .note .grid small{display:block; font-size:12px; color:var(--muted); font-weight:600}
 .note .grid b{display:block; overflow-wrap:anywhere}
 .note .text{white-space:pre-wrap; overflow-wrap:anywhere; margin:0 0 8px}
 .note.done .apoyo,.note.done .text{text-decoration:line-through; opacity:.6}
 .donebox{display:flex; align-items:center; gap:8px; min-height:42px; font-weight:600; font-size:14px; margin-right:auto}
-.donebox input{width:24px; height:24px}
+.donebox input{width:24px; height:24px; accent-color:var(--orange-d)}
 
 .empty{text-align:center; color:var(--muted); padding:26px 10px}
 .hint{font-size:13px; color:var(--muted); margin:8px 0 0}
 .toast{
   position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom,0px) + 20px); transform:translateX(-50%);
-  background:var(--brand); color:#fff; padding:10px 18px; border-radius:24px; font-weight:600;
-  box-shadow:0 4px 14px rgba(0,0,0,.3); z-index:20; max-width:90vw; text-align:center;
+  background:var(--text); color:#fff; padding:10px 18px; border-radius:24px; font-weight:600;
+  box-shadow:0 4px 14px rgba(0,0,0,.25); z-index:20; max-width:90vw; text-align:center;
 }
 .toast[hidden]{display:none}
-@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
@@ -146,16 +159,13 @@ fieldset.catset{border:0; padding:0; margin:0 0 4px; min-width:0}
 (function(){
   'use strict';
 
-  var CATS = {
-    def: 'Cambiar defectos',
-    sec: 'Cambiar secciones',
-    pen: 'Acciones pendientes'
-  };
+  var CATS = { def: 'Cambiar defectos', sec: 'Cambiar secciones', pen: 'Acciones pendientes' };
   var SHORT = { def: 'Defectos', sec: 'Secciones', pen: 'Pendientes' };
   var KEY = 'anotaciones-ptcd-v1';
+  var WA_MAX = 6000; /* longitud máxima razonable del enlace de WhatsApp */
 
   var data = load();
-  var state = { view: 'home', ptId: null, filter: 'all', editId: null, cat: 'def', salida: '' };
+  var state = { view: 'home', ptId: null, filter: 'all', editId: null, cat: 'def', salida: '', q: '' };
   var app = document.getElementById('app');
   var toastEl = document.getElementById('toast');
   var toastTimer;
@@ -192,7 +202,7 @@ fieldset.catset{border:0; padding:0; margin:0 0 4px; min-width:0}
   function toast(msg){
     toastEl.textContent = msg; toastEl.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function(){ toastEl.hidden = true; }, 2200);
+    toastTimer = setTimeout(function(){ toastEl.hidden = true; }, 2600);
   }
 
   /* ---------- Vista: inicio ---------- */
@@ -203,32 +213,56 @@ fieldset.catset{border:0; padding:0; margin:0 0 4px; min-width:0}
       '<span class="badge pen">' + c.pen + ' ' + SHORT.pen + '</span></div>';
   }
 
+  function ptListHTML(){
+    var q = state.q.trim().toLowerCase();
+    var list = data.pts.filter(function(p){ return !q || p.name.toLowerCase().indexOf(q) !== -1; })
+                       .sort(function(a,b){ return b.created - a.created; });
+    if(!list.length){
+      return '<div class="empty">' + (data.pts.length ? 'Ningún PT/CD coincide con la búsqueda.'
+        : 'Todavía no hay ningún PT/CD. Crea el primero arriba.') + '</div>';
+    }
+    return list.map(function(pt){
+      return '<div class="ptitem">' +
+        '<button class="open" data-open="' + pt.id + '">' +
+          '<div class="name">' + esc(pt.name) + '</div>' +
+          '<div class="meta">' + pt.notes.length + (pt.notes.length === 1 ? ' anotación' : ' anotaciones') + ', creado el ' + fmtDate(pt.created) + '</div>' +
+          badgesHTML(counts(pt)) + '</button>' +
+        '<button class="wa-mini" data-share="' + pt.id + '" aria-label="Compartir ' + esc(pt.name) + ' por WhatsApp">WhatsApp</button>' +
+      '</div>';
+    }).join('');
+  }
+
   function renderHome(){
-    var list = data.pts.slice().sort(function(a,b){ return b.created - a.created; });
-    var items = list.length ? list.map(function(pt){
-      return '<button class="ptitem" data-open="' + pt.id + '">' +
-        '<div class="name">' + esc(pt.name) + '</div>' +
-        '<div class="meta">' + pt.notes.length + ' anotaciones, creado el ' + fmtDate(pt.created) + '</div>' +
-        badgesHTML(counts(pt)) + '</button>';
-    }).join('') : '<div class="empty">Todavía no hay ningún PT/CD. Crea el primero arriba.</div>';
+    var total = 0, pend = 0;
+    data.pts.forEach(function(p){
+      total += p.notes.length;
+      p.notes.forEach(function(n){ if(n.cat === 'pen' && !n.done) pend++; });
+    });
 
     app.innerHTML =
-      '<header class="top"><h1>Anotaciones PT/CD</h1></header>' +
+      '<header class="top"><h1>Anotaciones PT/CD<small>Registro de la jornada</small></h1></header>' +
       '<main class="wrap">' +
-        '<form id="ptForm" class="card" autocomplete="off">' +
+        '<div class="stats">' +
+          '<div><b>' + data.pts.length + '</b><span>Centros</span></div>' +
+          '<div><b>' + total + '</b><span>Anotaciones</span></div>' +
+          '<div><b>' + pend + '</b><span>Por hacer</span></div>' +
+        '</div>' +
+        '<form id="ptForm" class="card soft" autocomplete="off">' +
           '<label class="field">Nuevo PT/CD' +
-            '<input name="name" required placeholder="Número de PT o CD" enterkeyhint="done"></label>' +
+            '<input name="ptname" required placeholder="Número de PT o CD" enterkeyhint="done"></label>' +
           '<button class="btn primary" type="submit">Crear PT/CD</button>' +
         '</form>' +
-        items +
-        '<section class="card">' +
+        (data.pts.length ? '<button class="btn wa" data-act="share-all" style="margin-bottom:14px">Compartir todos los centros por WhatsApp</button>' : '') +
+        (data.pts.length > 4 ? '<input id="search" class="search" type="search" placeholder="Buscar PT/CD" value="' + esc(state.q) + '">' : '') +
+        '<div id="ptlist">' + ptListHTML() + '</div>' +
+        '<section class="card" style="margin-top:18px">' +
           '<h2>Copia de seguridad</h2>' +
           '<div class="btn-row">' +
             '<button class="btn small" data-act="export">Descargar copia</button>' +
             '<button class="btn small" data-act="import">Cargar copia</button>' +
           '</div>' +
           '<input id="importFile" type="file" accept="application/json,.json" hidden>' +
-          '<p class="hint">Los datos se guardan solo en este dispositivo y navegador. Descarga una copia para pasarlos a otro móvil o ordenador.</p>' +
+          '<p class="hint">Los datos se guardan solo en este dispositivo y navegador. Descarga una copia para pasarlos a otro móvil u ordenador.</p>' +
         '</section>' +
       '</main>';
   }
@@ -247,11 +281,12 @@ fieldset.catset{border:0; padding:0; margin:0 0 4px; min-width:0}
 
     app.innerHTML =
       '<header class="top">' +
-        '<button class="iconbtn" data-act="back" aria-label="Volver a la lista">Volver</button>' +
-        '<h1>' + esc(pt.name) + '</h1>' +
+        '<button class="back" data-act="back" aria-label="Volver a la lista">Volver</button>' +
+        '<h1>' + esc(pt.name) + '<small>PT/CD</small></h1>' +
+        '<button class="wa-mini" data-share="' + pt.id + '" aria-label="Compartir por WhatsApp">WhatsApp</button>' +
       '</header>' +
       '<main class="wrap">' +
-        '<form id="noteForm" class="card" autocomplete="off">' +
+        '<form id="noteForm" class="card soft" autocomplete="off">' +
           '<h2>' + (editing ? 'Editar anotación' : 'Nueva anotación') + '</h2>' +
           '<label class="field">Número de apoyo' +
             '<input name="apoyo" required value="' + esc(v.apoyo) + '" enterkeyhint="next"></label>' +
@@ -313,23 +348,30 @@ fieldset.catset{border:0; padding:0; margin:0 0 4px; min-width:0}
     if(state.view === 'pt') renderPT(); else renderHome();
   }
 
-  /* ---------- Acciones ---------- */
-  function summaryText(pt){
-    var out = [pt.name];
+  /* ---------- Texto para compartir ---------- */
+  function ptBlock(pt){
+    var out = ['*' + pt.name + '*'];
+    if(!pt.notes.length){ out.push('Sin anotaciones'); return out.join('\n'); }
     ['def','sec','pen'].forEach(function(k){
       var ns = pt.notes.filter(function(n){ return n.cat === k; });
       if(!ns.length) return;
-      out.push('', CATS[k].toUpperCase());
+      out.push('', '_' + CATS[k] + ' (' + ns.length + ')_');
       ns.slice().sort(function(a,b){ return a.ts - b.ts; }).forEach(function(n){
         var parts = ['Apoyo ' + n.apoyo];
         if(n.salida) parts.push('Salida ' + n.salida);
         if(n.inicio) parts.push('Inicio ' + n.inicio);
         if(n.final) parts.push('Final ' + n.final);
         if(n.text) parts.push(n.text.replace(/\s*\n\s*/g,' '));
-        out.push('- ' + (n.done ? '[hecha] ' : '') + parts.join(', '));
+        out.push((n.done ? '✅ ' : '- ') + parts.join(', '));
       });
     });
     return out.join('\n');
+  }
+  function shareText(pts){
+    var today = fmtDate(Date.now());
+    if(pts.length === 1) return ptBlock(pts[0]) + '\n\nFecha: ' + today;
+    return '*ANOTACIONES ' + today + '*\n' + pts.length + ' centros\n\n' +
+      pts.map(ptBlock).join('\n\n----------\n\n');
   }
 
   function copyText(t){
@@ -341,6 +383,21 @@ fieldset.catset{border:0; padding:0; margin:0 0 4px; min-width:0}
       ta.value = t; document.body.appendChild(ta); ta.select();
       try{ document.execCommand('copy') ? res() : rej(); }catch(e){ rej(e); }
       document.body.removeChild(ta);
+    });
+  }
+
+  function sendWhatsApp(text){
+    var url = 'https://wa.me/?text=' + encodeURIComponent(text);
+    if(url.length <= WA_MAX){
+      window.open(url, '_blank');
+      return;
+    }
+    /* Mensaje demasiado largo para el enlace: se copia y se abre WhatsApp para pegarlo */
+    copyText(text).then(function(){
+      toast('Resumen largo copiado. Pégalo en el chat de WhatsApp');
+      setTimeout(function(){ window.open('https://wa.me/', '_blank'); }, 900);
+    }, function(){
+      toast('Resumen demasiado largo. Comparte los centros de uno en uno');
     });
   }
 
@@ -366,11 +423,17 @@ fieldset.catset{border:0; padding:0; margin:0 0 4px; min-width:0}
     r.readAsText(file);
   }
 
+  /* ---------- Eventos ---------- */
   document.addEventListener('click', function(e){
-    var t = e.target.closest('[data-open],[data-act],[data-filter],[data-edit],[data-del]');
+    var t = e.target.closest('[data-open],[data-act],[data-filter],[data-edit],[data-del],[data-share]');
     if(!t) return;
     var pt = getPT(state.ptId);
 
+    if(t.dataset.share){
+      var s = getPT(t.dataset.share);
+      if(s) sendWhatsApp(shareText([s]));
+      return;
+    }
     if(t.dataset.open){
       state.view = 'pt'; state.ptId = t.dataset.open; state.filter = 'all'; state.editId = null;
       state.salida = ''; state.cat = 'def'; render(); window.scrollTo(0,0); return;
@@ -395,11 +458,24 @@ fieldset.catset{border:0; padding:0; margin:0 0 4px; min-width:0}
         }
         break;
       case 'copy':
-        if(pt) copyText(summaryText(pt)).then(function(){ toast('Resumen copiado'); },
+        if(pt) copyText(shareText([pt])).then(function(){ toast('Resumen copiado'); },
                                               function(){ toast('No se pudo copiar'); });
+        break;
+      case 'share-all':
+        if(data.pts.length){
+          var all = data.pts.slice().sort(function(a,b){ return a.created - b.created; });
+          sendWhatsApp(shareText(all));
+        }
         break;
       case 'export': exportData(); break;
       case 'import': document.getElementById('importFile').click(); break;
+    }
+  });
+
+  document.addEventListener('input', function(e){
+    if(e.target.id === 'search'){
+      state.q = e.target.value;
+      document.getElementById('ptlist').innerHTML = ptListHTML();
     }
   });
 
@@ -418,8 +494,9 @@ fieldset.catset{border:0; padding:0; margin:0 0 4px; min-width:0}
     var f = e.target;
 
     if(f.id === 'ptForm'){
-      var name = f.elements.name.value.trim();
-      if(!name) return;
+      var nameInput = f.querySelector('input[name="ptname"]');
+      var name = nameInput ? nameInput.value.trim() : '';
+      if(!name){ if(nameInput) nameInput.focus(); return; }
       var found = data.pts.filter(function(p){ return p.name.toLowerCase() === name.toLowerCase(); })[0];
       if(found){ toast('Ese PT/CD ya existe, se abre'); }
       else{
