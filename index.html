@@ -6,6 +6,11 @@
 <meta name="theme-color" content="#ffffff">
 <meta name="color-scheme" content="light">
 <title>Anotaciones PT/CD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600;700&display=swap">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 :root{
   --bg:#ffffff; --soft:#f3f4f6; --line:#e5e7eb; --text:#1f2937; --muted:#6b7280;
@@ -149,6 +154,22 @@ fieldset.catset{border:0; padding:0; margin:0 0 4px; min-width:0}
   box-shadow:0 4px 14px rgba(0,0,0,.25); z-index:20; max-width:90vw; text-align:center;
 }
 .toast[hidden]{display:none}
+
+/* ===== Identidad JDev (solo apariencia) ===== */
+.jd-tile{width:38px;height:38px;border-radius:10px;background:#EE6A1C;color:#fff;display:grid;place-items:center;flex:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+.jd-tile svg{width:22px;height:22px;display:block}
+.jd-strip{background:var(--jd-strip-bg,#fff);border-bottom:3px solid #EE6A1C;height:60px;display:flex;justify-content:flex-end;overflow:hidden}
+.jd-banner{display:block;height:100%;width:auto;max-width:none;flex:none;color:var(--jd-trazo,#A9AEB5);-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 22%);mask-image:linear-gradient(90deg,transparent 0,#000 22%)}
+.jdev{font-family:"Barlow", "Segoe UI", system-ui, sans-serif!important;font-weight:600}
+@media (max-width:360px){.jd-strip{height:50px}}
+
+:root{--bg:#fff;--soft:#E9EBEE;--line:#DDE0E4;--text:#262A2F;--muted:#5E656E;--orange:#EE6A1C;--orange-d:#C9530F;--orange-bg:#FFF2E8}
+html,body{background:#F2F3F5}
+.top{border-bottom:1px solid #DDE0E4}
+.top h1{font-family:"Barlow", "Segoe UI", system-ui, sans-serif;font-weight:700;font-size:21px}
+.card.soft{background:#fff;border-color:#DDE0E4}
+h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-serif}
+
 </style>
 </head>
 <body>
@@ -241,7 +262,8 @@ fieldset.catset{border:0; padding:0; margin:0 0 4px; min-width:0}
     });
 
     app.innerHTML =
-      '<header class="top"><h1>Anotaciones PT/CD<small>Registro de la jornada</small></h1></header>' +
+      '<header class="top"><span class="jd-tile" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4.5h2.5M15.5 4.5H18a1.5 1.5 0 0 1 1.5 1.5v14a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 20V6A1.5 1.5 0 0 1 6 4.5 M9 3h6v3H9z M8 11h.01M11 11h5.5M8 14.5h.01M11 14.5h5.5M8 18h.01M11 18h3.5"/></svg></span><h1>Anotaciones PT/CD<small>Registro de la jornada</small></h1></header>' +
+      '<div class="jd-strip" aria-hidden="true"><svg class="jd-banner" viewBox="0 0 360 81" preserveAspectRatio="xMaxYMax meet" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M28.5 80L29.2 36H30.8L31.5 80M22 40H38"/><circle cx="23" cy="38.5" r="1.2"/><circle cx="37" cy="38.5" r="1.2"/><path d="M103.5 80L104.2 36H105.8L106.5 80M97 40H113"/><circle cx="98" cy="38.5" r="1.2"/><circle cx="112" cy="38.5" r="1.2"/><path d="M23 38.5Q60.5 46.5 98 38.5"/><path d="M37 38.5Q74.5 46.5 112 38.5"/><path stroke="#EE6A1C" stroke-width="1.7" d="M105 25C104 21 100 19.5 100 16A5 5 0 0 1 110 16C110 19.5 106 21 105 25Z"/><circle stroke="#EE6A1C" stroke-width="1.7" cx="105" cy="16" r="1.6"/><path d="M178.5 80L179.2 36H180.8L181.5 80M172 40H188"/><circle cx="173" cy="38.5" r="1.2"/><circle cx="187" cy="38.5" r="1.2"/><path d="M98 38.5Q135.5 46.5 173 38.5"/><path d="M112 38.5Q149.5 46.5 187 38.5"/><path d="M253.5 80L254.2 36H255.8L256.5 80M247 40H263"/><circle cx="248" cy="38.5" r="1.2"/><circle cx="262" cy="38.5" r="1.2"/><path d="M173 38.5Q210.5 46.5 248 38.5"/><path d="M187 38.5Q224.5 46.5 262 38.5"/><path stroke="#EE6A1C" stroke-width="1.7" d="M255 25C254 21 250 19.5 250 16A5 5 0 0 1 260 16C260 19.5 256 21 255 25Z"/><circle stroke="#EE6A1C" stroke-width="1.7" cx="255" cy="16" r="1.6"/><path d="M328.5 80L329.2 36H330.8L331.5 80M322 40H338"/><circle cx="323" cy="38.5" r="1.2"/><circle cx="337" cy="38.5" r="1.2"/><path d="M248 38.5Q285.5 46.5 323 38.5"/><path d="M262 38.5Q299.5 46.5 337 38.5"/><path stroke="#EE6A1C" stroke-width="1.7" d="M330 25C329 21 325 19.5 325 16A5 5 0 0 1 335 16C335 19.5 331 21 330 25Z"/><circle stroke="#EE6A1C" stroke-width="1.7" cx="330" cy="16" r="1.6"/></svg></div>' +
       '<main class="wrap">' +
         '<div class="stats">' +
           '<div><b>' + data.pts.length + '</b><span>Centros</span></div>' +
