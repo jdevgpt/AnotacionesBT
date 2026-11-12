@@ -171,6 +171,10 @@ html,body{background:#F2F3F5}
 h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-serif}
 
 </style>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Anotaciones">
 </head>
 <body>
 <div id="app"></div>
@@ -561,6 +565,10 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
 
   render();
 })();
+</script>
+<script>/* App instalable y sin conexión */
+if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}
+try{if(navigator.storage&&navigator.storage.persist&&(matchMedia('(display-mode: standalone)').matches||navigator.standalone))navigator.storage.persist();}catch(e){}
 </script>
 </body>
 </html>
