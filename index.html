@@ -348,6 +348,8 @@ details.card summary{font-weight:700;cursor:pointer;min-height:32px;display:flex
   ]
  ]
 ];
+  /* ZOBX: aquí sí se incluye (el KMZ también distingue ZOBX_Q91X) */
+  DEFECTOS.push(['ZOBX', [['ZOBX', ''], ['ZOBX_Q91X', '']]]);
   var DEF_DESC = {};
   DEFECTOS.forEach(function(g){ g[1].forEach(function(d){ DEF_DESC[d[0]] = d[1]; }); });
 
@@ -429,7 +431,7 @@ details.card summary{font-weight:700;cursor:pointer;min-height:32px;display:flex
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function(){ toastEl.hidden = true; }, 2600);
   }
-  function defTxt(c){ return c === 'SIN' ? 'Sin defecto' : c + ' - ' + (DEF_DESC[c] || ''); }
+  function defTxt(c){ return c === 'SIN' ? 'Sin defecto' : c + (DEF_DESC[c] ? ' - ' + DEF_DESC[c] : ''); }
 
   /* ---------- Piezas de formulario ---------- */
   function opts(list, valor, ph){
@@ -442,7 +444,7 @@ details.card summary{font-weight:700;cursor:pointer;min-height:32px;display:flex
     if(conSin) h += '<option value="SIN"' + (valor === 'SIN' ? ' selected' : '') + '>Sin defecto (no es defecto)</option>';
     DEFECTOS.forEach(function(g){
       h += '<optgroup label="' + esc(g[0]) + '">' + g[1].map(function(d){
-        return '<option value="' + d[0] + '"' + (d[0] === valor ? ' selected' : '') + '>' + esc(d[0] + ' - ' + d[1]) + '</option>';
+        return '<option value="' + d[0] + '"' + (d[0] === valor ? ' selected' : '') + '>' + esc(d[0] + (d[1] ? ' - ' + d[1] : '')) + '</option>';
       }).join('') + '</optgroup>';
     });
     return h;
