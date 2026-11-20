@@ -191,7 +191,7 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
   var WA_MAX = 6000; /* longitud máxima razonable del enlace de WhatsApp */
 
   var data = load();
-  var state = { view: 'home', ptId: null, filter: 'all', editId: null, cat: 'def', salida: '', q: '' };
+  var state = { view: 'home', ptId: null, filter: 'all', editId: null, cat: 'sec', salida: '', q: '' };
   var app = document.getElementById('app');
   var toastEl = document.getElementById('toast');
   var toastTimer;
@@ -463,7 +463,7 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
     }
     if(t.dataset.open){
       state.view = 'pt'; state.ptId = t.dataset.open; state.filter = 'all'; state.editId = null;
-      state.salida = ''; state.cat = 'def'; render(); window.scrollTo(0,0); return;
+      state.salida = ''; state.cat = 'sec'; render(); window.scrollTo(0,0); return;
     }
     if(t.dataset.filter){ state.filter = t.dataset.filter; renderList(); return; }
     if(t.dataset.edit){ state.editId = t.dataset.edit; renderPT(); window.scrollTo(0,0); return; }
@@ -531,7 +531,7 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
         data.pts.push(found); save();
       }
       state.view = 'pt'; state.ptId = found.id; state.filter = 'all'; state.editId = null;
-      state.salida = ''; state.cat = 'def'; render(); window.scrollTo(0,0);
+      state.salida = ''; state.cat = 'sec'; render(); window.scrollTo(0,0);
       return;
     }
 
@@ -546,7 +546,7 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
         salida: el.salida.value.trim(),
         inicio: el.inicio.value.trim(),
         final: el.final.value.trim(),
-        cat: catSel ? catSel.value : 'def',
+        cat: catSel ? catSel.value : 'sec',
         text: el.text.value.trim()
       };
       if(state.editId){
