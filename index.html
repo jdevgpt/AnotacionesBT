@@ -170,6 +170,35 @@ html,body{background:#F2F3F5}
 .card.soft{background:#fff;border-color:#DDE0E4}
 h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-serif}
 
+
+/* ===== Tipos de anotación (cambio de sección, compartido, defecto, aclaración) ===== */
+label.field select,.sel{display:block;width:100%;margin-top:4px;padding:12px;font-size:16px;font-weight:500;color:var(--text);background:#fff;border:2px solid #6b7280;border-radius:10px;min-height:50px;font-family:inherit}
+label.field select:focus,.sel:focus{outline:3px solid var(--orange-bg);border-color:var(--orange-d)}
+.cats{grid-template-columns:repeat(2,1fr)}
+.cat.comp span{background:var(--pen-bg);color:var(--pen-ink);border-color:#dccffa}
+.cat.comp input:checked + span{background:var(--pen);color:#fff;border-color:var(--pen)}
+.cat.acl span{background:var(--orange-bg);color:var(--orange-d);border-color:#f9d3b4}
+.cat.acl input:checked + span{background:var(--orange-d);color:#fff;border-color:var(--orange-d)}
+.badge.comp{background:var(--pen-bg);color:var(--pen-ink)}
+.badge.acl{background:var(--orange-bg);color:var(--orange-d)}
+.note.comp{border-left-color:var(--pen)}
+.note.acl{border-left-color:var(--orange)}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.kv.one{grid-template-columns:1fr}
+.kv div{background:var(--soft);border-radius:8px;padding:6px 8px;min-width:0}
+.kv small{display:block;font-size:12px;color:var(--muted);font-weight:600}
+.kv b{display:block;overflow-wrap:anywhere}
+.lbl{font-size:14px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.rowsal{display:grid;grid-template-columns:1fr 1.4fr 44px;gap:8px;margin-bottom:8px;align-items:center}
+.rowsal .sel{margin-top:0}
+.rowsal .x{width:44px;height:44px;border-radius:10px;border:1.5px solid #f3b4b4;background:#fff;color:var(--def-ink);font-size:22px;font-weight:700;cursor:pointer;line-height:1}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:700;vertical-align:2px}
+.tag.ok{background:var(--wa-bg);color:var(--wa)}
+.tag.go{background:var(--orange-bg);color:var(--orange-d)}
+.pista{margin:-4px 0 10px;min-height:18px}
+.fin{background:var(--wa-bg);border:1.5px solid var(--wa);border-radius:12px;padding:14px;margin-bottom:14px}
+details.card summary{font-weight:700;cursor:pointer;min-height:32px;display:flex;align-items:center}
+.note .meta{font-size:13px;color:var(--muted)}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
@@ -185,31 +214,197 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
 (function(){
   'use strict';
 
-  var CATS = { def: 'Cambiar defectos', sec: 'Cambiar secciones', pen: 'Acciones pendientes' };
-  var SHORT = { def: 'Defectos', sec: 'Secciones', pen: 'Pendientes' };
   var KEY = 'anotaciones-ptcd-v1';
   var WA_MAX = 6000; /* longitud máxima razonable del enlace de WhatsApp */
 
+  var TIPOS = {
+    sec:  { label: 'Cambio de sección',  short: 'Secciones', uno: 'Sección',    grupo: 'CAMBIOS DE SECCIÓN' },
+    comp: { label: 'Apoyo compartido',   short: 'Compartidos', uno: 'Compartido',  grupo: 'APOYOS COMPARTIDOS' },
+    def:  { label: 'Cambio de defecto',  short: 'Defectos', uno: 'Defecto',     grupo: 'CAMBIOS DE DEFECTO' },
+    acl:  { label: 'Aclaración',         short: 'Aclaraciones', uno: 'Aclaración', grupo: 'ACLARACIONES' }
+  };
+  var ORDEN = ['sec', 'comp', 'def', 'acl'];
+  var LEGACY = { def: 'Cambiar defectos', sec: 'Cambiar secciones', pen: 'Acciones pendientes' };
+
+  /* Secciones que se ponen en AppSheet */
+  var SEC_APP = ['RZ150', 'RZ95', 'RZ50', 'RZ25', 'RZ2X25', 'RZ2X16', 'RZ2X10'];
+  /* Todas las secciones reales (las mismas que la app de KMZ y ANEXO III) */
+  var SEC_ALL = ['RZ150', 'RZ95', 'RZ50', 'RZ25', 'RZ2X25', 'RZ2X16', 'RZ2X10', 'CU2X6', 'CU2X10', 'AL2X6', 'AL2X10', 'CU3X6', 'CU3X10', 'AL3X6', 'AL3X10', 'CU4X6', 'CU4X10', 'AL4X6', 'AL4X10', '2X6', '2X10', '2X16', '3X6', '3X10', '3X16', '4X6', '4X10', '4X16'];
+  var SALIDAS = (function(){ var a = []; for(var i = 1; i <= 10; i++) a.push('SAL' + (i < 10 ? '0' : '') + i); return a; })();
+  var PROVINCIAS = ['Badajoz', 'Cáceres', 'Sevilla', 'Málaga', 'Huelva', 'Córdoba', 'Cádiz', 'Granada', 'Jaén', 'Almería'];
+
+  /* Tabla de defectos BT (BEL011) */
+  var DEFECTOS = [
+ [
+  "AISLAMIENTO (A)",
+  [
+   [
+    "A21X",
+    "AISLADOR DE BT ROTO O AGRIETADO EN TORRE METÁLICA."
+   ]
+  ]
+ ],
+ [
+  "CONDUCTORES (C)",
+  [
+   [
+    "C11X",
+    "CONDUCTOR CON VENAS ROTAS CON RIESGO INMINENTE DE CAÍDA"
+   ]
+  ]
+ ],
+ [
+  "DISTANCIAS REGLAMENTARIAS (D)",
+  [
+   [
+    "D13X",
+    "CONDUCTOR DESNUDO AL SUELO DE LA TERRAZA O BALCÓN < A 3 M."
+   ],
+   [
+    "D15X",
+    "CONDUCTOR DESNUDO SOBRE ABERTURAS EDIFICIOS < A 0,3 M."
+   ],
+   [
+    "D16X",
+    "DISTANCIA INSUFICIENTE DE CONDUCTORES DESNUDOS A ABERTURAS."
+   ],
+   [
+    "D17X",
+    "DISTANCIA INSUFICIENTE DE CONDUCTORES DESNUDOS A FACHADAS"
+   ]
+  ]
+ ],
+ [
+  "CRUCES (G)",
+  [
+   [
+    "G56X",
+    "CRUCE CON VÍAS DE COMUNICACIÓN Y CALLES CON PINZA DE ANCLAJE ROTA"
+   ]
+  ]
+ ],
+ [
+  "HERRAJES (H)",
+  [
+   [
+    "H43X",
+    "HERRAJES, FALTAN GRAPAS O ESTÁN ROTAS EN CABLE TRENZADO"
+   ],
+   [
+    "H62X",
+    "PALOMILLA O POSTECILLO EN MAL ESTADO QUE PRESAGIE SU INMINENTE CAÍDA POR ESTAR SUELTA ALGUNA DE SUS PATAS."
+   ]
+  ]
+ ],
+ [
+  "DISTANCIAS A ZONAS ARBOLADAS (L)",
+  [
+   [
+    "L23X",
+    "CONDUCTOR DESNUDO QUE ESTÁ TOCANDO AL ARBOLADO EN BOSQUES"
+   ],
+   [
+    "L24X",
+    "CONDUCTOR AISLADO CON VENAS ROTAS EN BOSQUE O AISLAMIENTO PELADO TOCANDO RAMAS EN BOSQUE."
+   ],
+   [
+    "L62X",
+    "VANO, DISTANCIA VERTICAL AL SUELO < A 4 M."
+   ]
+  ]
+ ],
+ [
+  "APOYO BT (P)",
+  [
+   [
+    "P11X",
+    "APOYO METÁLICO DEFORMADO O REVIRADO, QUE AFECTE AL TENSE."
+   ],
+   [
+    "P21X",
+    "APOYO DE HORMIGÓN CON GRIETAS Y CON RIESGO DE CAÍDA INMINENTE"
+   ],
+   [
+    "P31X",
+    "APOYO DE MADERA PODRIDO O ROTO CON RIESGO DE CAÍDA Y CON RIESGO DE CAÍDA INMINENTE."
+   ]
+  ]
+ ],
+ [
+  "APARAMENTA BT (Q)",
+  [
+   [
+    "QA1X",
+    "INSTALACIÓN DUDOSA CON POSIBLE FRAUDE"
+   ],
+   [
+    "Q92Y",
+    "CAJA DE DISTRIBUCIÓN RED SUBTERRÁNEA CON LAS BASES ACCESIBLES"
+   ],
+   [
+    "Q91X",
+    "PUNTAS ABIERTAS. DERIVACIONES SIN CLIENTES"
+   ]
+  ]
+ ]
+];
+  var DEF_DESC = {};
+  DEFECTOS.forEach(function(g){ g[1].forEach(function(d){ DEF_DESC[d[0]] = d[1]; }); });
+
   var data = load();
-  var state = { view: 'home', ptId: null, filter: 'all', editId: null, cat: 'sec', salida: '', q: '' };
+  var state = { view: 'home', ptId: null, filter: 'all', editId: null, tipo: 'sec', q: '' };
   var app = document.getElementById('app');
   var toastEl = document.getElementById('toast');
   var toastTimer;
 
+  /* Base de líneas por número de centro (se carga aparte) */
+  var LINEAS = null;
+  try{
+    fetch('lineas.json').then(function(r){ return r.json(); })
+      .then(function(d){ LINEAS = d; actualizarPista(); }).catch(function(){});
+  }catch(e){}
+  function normCD(n){ return String(n || '').trim().toUpperCase().replace(/^0+(?=\d)/, ''); }
+  function lineaDe(n){
+    if(!LINEAS || !normCD(n)) return null;
+    var i = LINEAS.c[normCD(n)];
+    return i == null ? '' : LINEAS.l[i];
+  }
+
   /* ---------- Almacenamiento ---------- */
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+  function migrar(d){
+    if(!d || !Array.isArray(d.pts)) return null;
+    d.pts.forEach(function(p){
+      if(!Array.isArray(p.notes)) p.notes = [];
+      if(p.linea == null) p.linea = '';
+      if(p.prov == null) p.prov = '';
+      if(p.finished == null) p.finished = null;
+      p.notes = p.notes.map(function(n){
+        if(n.tipo) return n;
+        /* Anotaciones de la versión anterior: se conservan como aclaraciones */
+        var partes = ['Anotación anterior: ' + (LEGACY[n.cat] || 'sin clasificar') + (n.done ? ' (hecha)' : '')];
+        if(n.salida) partes.push('Salida ' + n.salida);
+        if(n.inicio) partes.push('Inicio ' + n.inicio);
+        if(n.final) partes.push('Final ' + n.final);
+        if(n.text) partes.push(n.text);
+        return { id: n.id || uid(), ts: n.ts || Date.now(), tipo: 'acl', apoyo: n.apoyo || '', text: partes.join(' · ') };
+      });
+    });
+    if(!d.prov) d.prov = 'Badajoz';
+    return d;
+  }
   function load(){
     try{
       var raw = localStorage.getItem(KEY);
-      var d = raw ? JSON.parse(raw) : null;
-      if(d && Array.isArray(d.pts)) return d;
+      var d = migrar(raw ? JSON.parse(raw) : null);
+      if(d) return d;
     }catch(e){}
-    return { pts: [] };
+    return { pts: [], prov: 'Badajoz' };
   }
   function save(){
     try{ localStorage.setItem(KEY, JSON.stringify(data)); }
     catch(e){ toast('No se pudo guardar en este navegador'); }
   }
-  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
   function esc(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
@@ -217,12 +412,16 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
   }
   function getPT(id){ return data.pts.filter(function(p){ return p.id === id; })[0]; }
   function counts(pt){
-    var c = { def:0, sec:0, pen:0 };
-    pt.notes.forEach(function(n){ if(c[n.cat] != null) c[n.cat]++; });
+    var c = { sec:0, comp:0, def:0, acl:0 };
+    pt.notes.forEach(function(n){ if(c[n.tipo] != null) c[n.tipo]++; });
     return c;
   }
   function fmtDate(ts){
     try{ return new Date(ts).toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+    catch(e){ return ''; }
+  }
+  function fmtFechaHora(ts){
+    try{ return fmtDate(ts) + ' ' + new Date(ts).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}); }
     catch(e){ return ''; }
   }
   function toast(msg){
@@ -230,40 +429,84 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function(){ toastEl.hidden = true; }, 2600);
   }
+  function defTxt(c){ return c === 'SIN' ? 'Sin defecto' : c + ' - ' + (DEF_DESC[c] || ''); }
+
+  /* ---------- Piezas de formulario ---------- */
+  function opts(list, valor, ph){
+    return '<option value="">' + ph + '</option>' + list.map(function(x){
+      return '<option' + (x === valor ? ' selected' : '') + '>' + esc(x) + '</option>';
+    }).join('');
+  }
+  function defOpts(valor, conSin){
+    var h = '<option value="">Elegir defecto…</option>';
+    if(conSin) h += '<option value="SIN"' + (valor === 'SIN' ? ' selected' : '') + '>Sin defecto (no es defecto)</option>';
+    DEFECTOS.forEach(function(g){
+      h += '<optgroup label="' + esc(g[0]) + '">' + g[1].map(function(d){
+        return '<option value="' + d[0] + '"' + (d[0] === valor ? ' selected' : '') + '>' + esc(d[0] + ' - ' + d[1]) + '</option>';
+      }).join('') + '</optgroup>';
+    });
+    return h;
+  }
+  function rowHTML(sal, sec){
+    return '<div class="rowsal">' +
+      '<select class="sel" name="sal" required aria-label="Salida">' + opts(SALIDAS, sal, 'Salida') + '</select>' +
+      '<select class="sel" name="rsec" required aria-label="Sección de la salida">' + opts(SEC_ALL, sec, 'Sección') + '</select>' +
+      '<button type="button" class="x" data-act="del-row" aria-label="Quitar salida">×</button></div>';
+  }
+  function camposHTML(tipo, v){
+    v = v || {};
+    if(tipo === 'sec'){
+      return '<label class="field">Sección que han puesto en AppSheet<select name="appsec" required>' + opts(SEC_APP, v.appsec, 'Elegir sección…') + '</select></label>' +
+             '<label class="field">Sección real<select name="realsec" required>' + opts(SEC_ALL, v.realsec, 'Elegir sección…') + '</select></label>';
+    }
+    if(tipo === 'comp'){
+      var rows = (v.rows && v.rows.length) ? v.rows : [{ sal:'', sec:'' }, { sal:'', sec:'' }];
+      return '<div class="lbl">Salidas que comparte y sección de cada una</div>' +
+             '<div id="rows">' + rows.map(function(r){ return rowHTML(r.sal, r.sec); }).join('') + '</div>' +
+             '<button type="button" class="btn small" data-act="add-row" style="margin-bottom:12px">+ Añadir salida</button>';
+    }
+    if(tipo === 'def'){
+      return '<label class="field">Defecto que han puesto en AppSheet<select name="appdef" required>' + defOpts(v.appdef, false) + '</select></label>' +
+             '<label class="field">Defecto real<select name="realdef" required>' + defOpts(v.realdef, true) + '</select></label>';
+    }
+    return '<label class="field">Aclaración<textarea name="text" required placeholder="Escribe la aclaración">' + esc(v.text) + '</textarea></label>';
+  }
 
   /* ---------- Vista: inicio ---------- */
   function badgesHTML(c){
-    return '<div class="badges">' +
-      '<span class="badge def">' + c.def + ' ' + SHORT.def + '</span>' +
-      '<span class="badge sec">' + c.sec + ' ' + SHORT.sec + '</span>' +
-      '<span class="badge pen">' + c.pen + ' ' + SHORT.pen + '</span></div>';
+    var h = ORDEN.filter(function(k){ return c[k] > 0; }).map(function(k){
+      return '<span class="badge ' + k + '">' + c[k] + ' ' + (c[k] === 1 ? TIPOS[k].uno : TIPOS[k].short) + '</span>';
+    }).join('');
+    return '<div class="badges">' + (h || '<span class="meta">Sin anotaciones</span>') + '</div>';
   }
 
   function ptListHTML(){
     var q = state.q.trim().toLowerCase();
-    var list = data.pts.filter(function(p){ return !q || p.name.toLowerCase().indexOf(q) !== -1; })
-                       .sort(function(a,b){ return b.created - a.created; });
+    var list = data.pts.filter(function(p){
+      return !q || p.name.toLowerCase().indexOf(q) !== -1 || (p.linea || '').toLowerCase().indexOf(q) !== -1;
+    }).sort(function(a,b){
+      if(!!a.finished !== !!b.finished) return a.finished ? 1 : -1;
+      return b.created - a.created;
+    });
     if(!list.length){
-      return '<div class="empty">' + (data.pts.length ? 'Ningún PT/CD coincide con la búsqueda.'
-        : 'Todavía no hay ningún PT/CD. Crea el primero arriba.') + '</div>';
+      return '<div class="empty">' + (data.pts.length ? 'Ningún centro coincide con la búsqueda.'
+        : 'Todavía no hay ningún centro. Crea el primero arriba.') + '</div>';
     }
     return list.map(function(pt){
       return '<div class="ptitem">' +
         '<button class="open" data-open="' + pt.id + '">' +
-          '<div class="name">' + esc(pt.name) + '</div>' +
-          '<div class="meta">' + pt.notes.length + (pt.notes.length === 1 ? ' anotación' : ' anotaciones') + ', creado el ' + fmtDate(pt.created) + '</div>' +
+          '<div class="name">' + esc(pt.name) + ' ' +
+            (pt.finished ? '<span class="tag ok">Terminado ' + fmtFechaHora(pt.finished) + '</span>' : '<span class="tag go">En curso</span>') + '</div>' +
+          '<div class="meta">' + esc(pt.linea || 'Sin línea') + (pt.prov ? ' · ' + esc(pt.prov) : '') + '</div>' +
           badgesHTML(counts(pt)) + '</button>' +
-        '<button class="wa-mini" data-share="' + pt.id + '" aria-label="Compartir ' + esc(pt.name) + ' por WhatsApp">WhatsApp</button>' +
+        (pt.finished ? '<button class="wa-mini" data-share="' + pt.id + '" aria-label="Reenviar ' + esc(pt.name) + ' por WhatsApp">WhatsApp</button>' : '') +
       '</div>';
     }).join('');
   }
 
   function renderHome(){
-    var total = 0, pend = 0;
-    data.pts.forEach(function(p){
-      total += p.notes.length;
-      p.notes.forEach(function(n){ if(n.cat === 'pen' && !n.done) pend++; });
-    });
+    var total = 0, fin = 0;
+    data.pts.forEach(function(p){ total += p.notes.length; if(p.finished) fin++; });
 
     app.innerHTML =
       '<header class="top"><span class="jd-tile" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4.5h2.5M15.5 4.5H18a1.5 1.5 0 0 1 1.5 1.5v14a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 20V6A1.5 1.5 0 0 1 6 4.5 M9 3h6v3H9z M8 11h.01M11 11h5.5M8 14.5h.01M11 14.5h5.5M8 18h.01M11 18h3.5"/></svg></span><h1>Anotaciones PT/CD<small>Registro de la jornada</small></h1></header>' +
@@ -271,16 +514,21 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
       '<main class="wrap">' +
         '<div class="stats">' +
           '<div><b>' + data.pts.length + '</b><span>Centros</span></div>' +
+          '<div><b>' + fin + '</b><span>Terminados</span></div>' +
           '<div><b>' + total + '</b><span>Anotaciones</span></div>' +
-          '<div><b>' + pend + '</b><span>Por hacer</span></div>' +
         '</div>' +
         '<form id="ptForm" class="card soft" autocomplete="off">' +
-          '<label class="field">Nuevo PT/CD' +
+          '<label class="field">Número de CD' +
             '<input name="ptname" required placeholder="Número de PT o CD" enterkeyhint="done"></label>' +
-          '<button class="btn primary" type="submit">Crear PT/CD</button>' +
+          '<p class="hint pista" id="pista"></p>' +
+          '<div class="row2">' +
+            '<label class="field">Línea<input name="linea" placeholder="Se rellena sola"></label>' +
+            '<label class="field">Provincia<select name="prov">' + PROVINCIAS.map(function(p){
+              return '<option' + (p === data.prov ? ' selected' : '') + '>' + p + '</option>'; }).join('') + '</select></label>' +
+          '</div>' +
+          '<button class="btn primary" type="submit">Crear centro</button>' +
         '</form>' +
-        (data.pts.length ? '<button class="btn wa" data-act="share-all" style="margin-bottom:14px">Compartir todos los centros por WhatsApp</button>' : '') +
-        (data.pts.length > 4 ? '<input id="search" class="search" type="search" placeholder="Buscar PT/CD" value="' + esc(state.q) + '">' : '') +
+        (data.pts.length > 4 ? '<input id="search" class="search" type="search" placeholder="Buscar centro o línea" value="' + esc(state.q) + '">' : '') +
         '<div id="ptlist">' + ptListHTML() + '</div>' +
         '<section class="card" style="margin-top:18px">' +
           '<h2>Copia de seguridad</h2>' +
@@ -294,47 +542,68 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
       '</main>';
   }
 
-  /* ---------- Vista: PT/CD ---------- */
+  /* Pista de línea al escribir el número de CD */
+  function actualizarPista(){
+    var f = document.getElementById('ptForm');
+    if(!f) return;
+    var n = f.elements.ptname.value, p = document.getElementById('pista'), l = f.elements.linea;
+    var lin = lineaDe(n);
+    if(!normCD(n)){ p.textContent = ''; }
+    else if(lin === null){ p.textContent = 'Buscando la línea…'; }
+    else if(lin){ p.textContent = 'Línea encontrada: ' + lin; }
+    else { p.textContent = 'Centro no encontrado en la base. Escribe la línea a mano.'; }
+    if(l.dataset.manual !== '1') l.value = lin || '';
+  }
+
+  /* ---------- Vista: centro ---------- */
   function renderPT(){
     var pt = getPT(state.ptId);
     if(!pt){ state.view = 'home'; return render(); }
     var editing = state.editId ? pt.notes.filter(function(n){ return n.id === state.editId; })[0] : null;
-    var v = editing || { apoyo:'', salida: state.salida, inicio:'', final:'', cat: state.cat, text:'' };
+    var tipo = editing ? editing.tipo : state.tipo;
+    var v = editing || {};
+    var fin = !!pt.finished;
 
-    function catRadio(key){
-      return '<label class="cat ' + key + '"><input type="radio" name="cat" value="' + key + '"' +
-        (v.cat === key ? ' checked' : '') + '><span>' + CATS[key] + '</span></label>';
+    function tipoRadio(key){
+      return '<label class="cat ' + key + '"><input type="radio" name="tipo" value="' + key + '"' +
+        (tipo === key ? ' checked' : '') + '><span>' + TIPOS[key].label + '</span></label>';
     }
 
     app.innerHTML =
       '<header class="top">' +
         '<button class="back" data-act="back" aria-label="Volver a la lista">Volver</button>' +
-        '<h1>' + esc(pt.name) + '<small>PT/CD</small></h1>' +
-        '<button class="wa-mini" data-share="' + pt.id + '" aria-label="Compartir por WhatsApp">WhatsApp</button>' +
+        '<h1>' + esc(pt.name) + '<small id="sub">' + esc(pt.linea || 'Sin línea') + (pt.prov ? ' · ' + esc(pt.prov) : '') + '</small></h1>' +
       '</header>' +
       '<main class="wrap">' +
-        '<form id="noteForm" class="card soft" autocomplete="off">' +
-          '<h2>' + (editing ? 'Editar anotación' : 'Nueva anotación') + '</h2>' +
-          '<label class="field">Número de apoyo' +
-            '<input name="apoyo" required value="' + esc(v.apoyo) + '" enterkeyhint="next"></label>' +
-          '<label class="field">Salida' +
-            '<input name="salida" value="' + esc(v.salida) + '" enterkeyhint="next"></label>' +
-          '<div class="row2">' +
-            '<label class="field">Inicio<input name="inicio" value="' + esc(v.inicio) + '" enterkeyhint="next"></label>' +
-            '<label class="field">Final<input name="final" value="' + esc(v.final) + '" enterkeyhint="next"></label>' +
+        '<details class="card"><summary>Datos del centro</summary>' +
+          '<div class="row2" style="margin-top:10px">' +
+            '<label class="field">Línea<input data-pt="linea" value="' + esc(pt.linea) + '"></label>' +
+            '<label class="field">Provincia<select data-pt="prov"><option value="">—</option>' + PROVINCIAS.map(function(p){
+              return '<option' + (p === pt.prov ? ' selected' : '') + '>' + p + '</option>'; }).join('') + '</select></label>' +
           '</div>' +
-          '<fieldset class="catset"><legend>Clasificación</legend>' +
-            '<div class="cats">' + catRadio('def') + catRadio('sec') + catRadio('pen') + '</div>' +
-          '</fieldset>' +
-          '<label class="field">Nota (opcional)<textarea name="text">' + esc(v.text) + '</textarea></label>' +
-          '<button class="btn primary" type="submit">' + (editing ? 'Guardar cambios' : 'Añadir anotación') + '</button>' +
-          (editing ? '<button class="btn" type="button" data-act="cancel-edit" style="margin-top:8px">Cancelar</button>' : '') +
-        '</form>' +
+        '</details>' +
+        (fin
+          ? '<div class="fin"><b>Centro terminado el ' + fmtFechaHora(pt.finished) + '</b>' +
+            '<div class="btn-row" style="margin-top:10px">' +
+              '<button class="btn wa" data-share="' + pt.id + '">Enviar por WhatsApp</button>' +
+              '<button class="btn small" data-act="reopen">Reabrir centro</button></div></div>'
+          : '<form id="noteForm" class="card soft" autocomplete="off">' +
+              '<h2>' + (editing ? 'Editar anotación' : 'Nueva anotación') + '</h2>' +
+              '<label class="field">Número de apoyo' +
+                '<input name="apoyo" required value="' + esc(v.apoyo) + '" enterkeyhint="next"></label>' +
+              '<fieldset class="catset"><legend>Qué quieres anotar</legend>' +
+                '<div class="cats">' + ORDEN.map(tipoRadio).join('') + '</div>' +
+              '</fieldset>' +
+              '<div id="campos">' + camposHTML(tipo, v) + '</div>' +
+              '<button class="btn primary" type="submit">' + (editing ? 'Guardar cambios' : 'Añadir anotación') + '</button>' +
+              (editing ? '<button class="btn" type="button" data-act="cancel-edit" style="margin-top:8px">Cancelar</button>' : '') +
+            '</form>') +
         '<div id="filters"></div>' +
         '<div id="list"></div>' +
+        (fin ? '' : '<button class="btn wa" data-act="finish" style="margin:6px 0 14px">Centro terminado · enviar por WhatsApp</button>') +
         '<div class="btn-row">' +
           '<button class="btn small" data-act="copy">Copiar resumen</button>' +
-          '<button class="btn small danger" data-act="del-pt">Borrar este PT/CD</button>' +
+          '<button class="btn small danger" data-act="del-pt">Borrar este centro</button>' +
         '</div>' +
       '</main>';
     renderList();
@@ -342,63 +611,72 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
 
   function renderList(){
     var pt = getPT(state.ptId); if(!pt) return;
-    var c = counts(pt);
-    var defs = [['all','Todas (' + pt.notes.length + ')'],['def', SHORT.def + ' (' + c.def + ')'],
-                ['sec', SHORT.sec + ' (' + c.sec + ')'],['pen', SHORT.pen + ' (' + c.pen + ')']];
+    var c = counts(pt), fin = !!pt.finished;
+    var defs = [['all', 'Todas (' + pt.notes.length + ')']].concat(ORDEN.map(function(k){
+      return [k, TIPOS[k].short + ' (' + c[k] + ')'];
+    }));
     document.getElementById('filters').innerHTML = '<div class="chips">' + defs.map(function(d){
       return '<button class="chip" data-filter="' + d[0] + '" aria-pressed="' + (state.filter === d[0]) + '">' + d[1] + '</button>';
     }).join('') + '</div>';
 
-    var notes = pt.notes.filter(function(n){ return state.filter === 'all' || n.cat === state.filter; })
+    var notes = pt.notes.filter(function(n){ return state.filter === 'all' || n.tipo === state.filter; })
                         .sort(function(a,b){ return b.ts - a.ts; });
     document.getElementById('list').innerHTML = notes.length ? notes.map(function(n){
-      var cat = CATS[n.cat] ? n.cat : 'def';
-      return '<article class="note ' + cat + (n.done ? ' done' : '') + '">' +
+      var t = TIPOS[n.tipo] ? n.tipo : 'acl', cuerpo = '';
+      if(t === 'sec'){
+        cuerpo = '<div class="kv"><div><small>AppSheet</small><b>' + esc(n.appsec) + '</b></div><div><small>Real</small><b>' + esc(n.realsec) + '</b></div></div>';
+      }else if(t === 'comp'){
+        cuerpo = '<div class="kv">' + (n.rows || []).map(function(r){
+          return '<div><small>' + esc(r.sal) + '</small><b>' + esc(r.sec) + '</b></div>'; }).join('') + '</div>';
+      }else if(t === 'def'){
+        cuerpo = '<div class="kv one"><div><small>AppSheet</small><b>' + esc(defTxt(n.appdef)) + '</b></div>' +
+                 '<div><small>Real</small><b>' + esc(defTxt(n.realdef)) + '</b></div></div>';
+      }else{
+        cuerpo = '<p class="text">' + esc(n.text) + '</p>';
+      }
+      return '<article class="note ' + t + '">' +
         '<div class="head"><span class="apoyo">Apoyo ' + esc(n.apoyo) + '</span>' +
-          '<span class="badge ' + cat + '">' + CATS[cat] + '</span></div>' +
-        '<div class="grid">' +
-          '<div><small>Salida</small><b>' + (esc(n.salida) || '-') + '</b></div>' +
-          '<div><small>Inicio</small><b>' + (esc(n.inicio) || '-') + '</b></div>' +
-          '<div><small>Final</small><b>' + (esc(n.final) || '-') + '</b></div>' +
-        '</div>' +
-        (n.text ? '<p class="text">' + esc(n.text) + '</p>' : '') +
-        '<div class="btn-row">' +
-          (cat === 'pen' ? '<label class="donebox"><input type="checkbox" data-done="' + n.id + '"' + (n.done ? ' checked' : '') + '>Hecha</label>' : '') +
+          '<span class="badge ' + t + '">' + TIPOS[t].label + '</span></div>' + cuerpo +
+        (fin ? '' : '<div class="btn-row">' +
           '<button class="btn small" data-edit="' + n.id + '">Editar</button>' +
-          '<button class="btn small danger" data-del="' + n.id + '">Borrar</button>' +
-        '</div></article>';
+          '<button class="btn small danger" data-del="' + n.id + '">Borrar</button></div>') +
+        '</article>';
     }).join('') : '<div class="empty">' +
-        (pt.notes.length ? 'No hay anotaciones en esta clasificación.' : 'Añade la primera anotación con el formulario de arriba.') + '</div>';
+        (pt.notes.length ? 'No hay anotaciones de este tipo.' : (fin ? 'Este centro no tiene anotaciones.' : 'Añade la primera anotación con el formulario de arriba.')) + '</div>';
   }
 
   function render(){
     if(state.view === 'pt') renderPT(); else renderHome();
   }
 
-  /* ---------- Texto para compartir ---------- */
-  function ptBlock(pt){
-    var out = ['*' + pt.name + '*'];
-    if(!pt.notes.length){ out.push('Sin anotaciones'); return out.join('\n'); }
-    ['def','sec','pen'].forEach(function(k){
-      var ns = pt.notes.filter(function(n){ return n.cat === k; });
+  /* ---------- Mensaje de WhatsApp ---------- */
+  function porApoyo(a, b){
+    var r = String(a.apoyo).localeCompare(String(b.apoyo), 'es', { numeric: true });
+    return r || (a.ts - b.ts);
+  }
+  function lineasNota(n){
+    if(n.tipo === 'sec') return ['AppSheet: ' + n.appsec, 'Real: ' + n.realsec];
+    if(n.tipo === 'comp') return (n.rows || []).map(function(r){ return r.sal + ': ' + r.sec; });
+    if(n.tipo === 'def') return ['AppSheet: ' + defTxt(n.appdef), 'Real: ' + defTxt(n.realdef)];
+    return String(n.text || '').split(/\n+/);
+  }
+  function mensaje(pt){
+    var o = ['*CENTRO ' + pt.name + '*'];
+    if(pt.linea) o.push('Línea: ' + pt.linea);
+    if(pt.prov) o.push('Provincia: ' + pt.prov);
+    ORDEN.forEach(function(t){
+      var ns = pt.notes.filter(function(n){ return n.tipo === t; }).sort(porApoyo);
       if(!ns.length) return;
-      out.push('', '_' + CATS[k] + ' (' + ns.length + ')_');
-      ns.slice().sort(function(a,b){ return a.ts - b.ts; }).forEach(function(n){
-        var parts = ['Apoyo ' + n.apoyo];
-        if(n.salida) parts.push('Salida ' + n.salida);
-        if(n.inicio) parts.push('Inicio ' + n.inicio);
-        if(n.final) parts.push('Final ' + n.final);
-        if(n.text) parts.push(n.text.replace(/\s*\n\s*/g,' '));
-        out.push((n.done ? '✅ ' : '- ') + parts.join(', '));
+      o.push('', '*' + TIPOS[t].grupo + '* (' + ns.length + ')');
+      ns.forEach(function(n){
+        o.push('Apoyo ' + n.apoyo);
+        lineasNota(n).forEach(function(l){ o.push('  ' + l); });
       });
     });
-    return out.join('\n');
-  }
-  function shareText(pts){
-    var today = fmtDate(Date.now());
-    if(pts.length === 1) return ptBlock(pts[0]) + '\n\nFecha: ' + today;
-    return '*ANOTACIONES ' + today + '*\n' + pts.length + ' centros\n\n' +
-      pts.map(ptBlock).join('\n\n----------\n\n');
+    if(!pt.notes.length) o.push('', 'Sin anotaciones');
+    o.push('', pt.finished ? 'Centro terminado: ' + fmtFechaHora(pt.finished)
+                           : 'Centro en curso. Resumen a fecha ' + fmtFechaHora(Date.now()));
+    return o.join('\n');
   }
 
   function copyText(t){
@@ -416,7 +694,7 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
   function sendWhatsApp(text){
     var url = 'https://wa.me/?text=' + encodeURIComponent(text);
     if(url.length <= WA_MAX){
-      window.open(url, '_blank');
+      if(!window.open(url, '_blank')) location.href = url;
       return;
     }
     /* Mensaje demasiado largo para el enlace: se copia y se abre WhatsApp para pegarlo */
@@ -424,7 +702,7 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
       toast('Resumen largo copiado. Pégalo en el chat de WhatsApp');
       setTimeout(function(){ window.open('https://wa.me/', '_blank'); }, 900);
     }, function(){
-      toast('Resumen demasiado largo. Comparte los centros de uno en uno');
+      toast('Resumen demasiado largo. No se pudo copiar');
     });
   }
 
@@ -441,8 +719,8 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
     var r = new FileReader();
     r.onload = function(){
       try{
-        var d = JSON.parse(r.result);
-        if(!d || !Array.isArray(d.pts)) throw new Error('formato');
+        var d = migrar(JSON.parse(r.result));
+        if(!d) throw new Error('formato');
         if(!confirm('Esto sustituirá los datos actuales de este dispositivo. ¿Continuar?')) return;
         data = d; save(); state.view = 'home'; render(); toast('Copia cargada');
       }catch(e){ toast('El archivo no es una copia válida'); }
@@ -458,12 +736,12 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
 
     if(t.dataset.share){
       var s = getPT(t.dataset.share);
-      if(s) sendWhatsApp(shareText([s]));
+      if(s) sendWhatsApp(mensaje(s));
       return;
     }
     if(t.dataset.open){
       state.view = 'pt'; state.ptId = t.dataset.open; state.filter = 'all'; state.editId = null;
-      state.salida = ''; state.cat = 'sec'; render(); window.scrollTo(0,0); return;
+      state.tipo = 'sec'; render(); window.scrollTo(0,0); return;
     }
     if(t.dataset.filter){ state.filter = t.dataset.filter; renderList(); return; }
     if(t.dataset.edit){ state.editId = t.dataset.edit; renderPT(); window.scrollTo(0,0); return; }
@@ -478,21 +756,34 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
     switch(t.dataset.act){
       case 'back': state.view = 'home'; state.ptId = null; state.editId = null; render(); window.scrollTo(0,0); break;
       case 'cancel-edit': state.editId = null; renderPT(); break;
+      case 'add-row':
+        document.getElementById('rows').insertAdjacentHTML('beforeend', rowHTML('', ''));
+        break;
+      case 'del-row':
+        if(document.querySelectorAll('#rows .rowsal').length > 1) t.closest('.rowsal').remove();
+        else toast('Tiene que quedar al menos una salida');
+        break;
+      case 'finish':
+        if(!pt) break;
+        if(confirm('¿Dar el centro ' + pt.name + ' por terminado? Se guardará la fecha y hora y se abrirá WhatsApp con el resumen.')){
+          pt.finished = Date.now(); state.editId = null; save(); renderPT(); window.scrollTo(0,0);
+          sendWhatsApp(mensaje(pt));
+        }
+        break;
+      case 'reopen':
+        if(pt && confirm('¿Reabrir el centro? Se borrará la fecha de finalización y podrás seguir anotando.')){
+          pt.finished = null; save(); renderPT();
+        }
+        break;
       case 'del-pt':
-        if(pt && confirm('¿Borrar "' + pt.name + '" y todas sus anotaciones?')){
+        if(pt && confirm('¿Borrar el centro "' + pt.name + '" y todas sus anotaciones?')){
           data.pts = data.pts.filter(function(p){ return p.id !== pt.id; });
           save(); state.view = 'home'; state.ptId = null; render();
         }
         break;
       case 'copy':
-        if(pt) copyText(shareText([pt])).then(function(){ toast('Resumen copiado'); },
-                                              function(){ toast('No se pudo copiar'); });
-        break;
-      case 'share-all':
-        if(data.pts.length){
-          var all = data.pts.slice().sort(function(a,b){ return a.created - b.created; });
-          sendWhatsApp(shareText(all));
-        }
+        if(pt) copyText(mensaje(pt)).then(function(){ toast('Resumen copiado'); },
+                                          function(){ toast('No se pudo copiar'); });
         break;
       case 'export': exportData(); break;
       case 'import': document.getElementById('importFile').click(); break;
@@ -500,19 +791,36 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
   });
 
   document.addEventListener('input', function(e){
-    if(e.target.id === 'search'){
-      state.q = e.target.value;
+    var t = e.target;
+    if(t.id === 'search'){
+      state.q = t.value;
       document.getElementById('ptlist').innerHTML = ptListHTML();
+      return;
+    }
+    if(t.form && t.form.id === 'ptForm'){
+      if(t.name === 'ptname') actualizarPista();
+      else if(t.name === 'linea') t.dataset.manual = t.value ? '1' : '';
+      return;
+    }
+    if(t.dataset && t.dataset.pt === 'linea'){
+      var p = getPT(state.ptId); if(!p) return;
+      p.linea = t.value.trim(); save();
+      document.getElementById('sub').textContent = (p.linea || 'Sin línea') + (p.prov ? ' · ' + p.prov : '');
     }
   });
 
   document.addEventListener('change', function(e){
     var t = e.target;
     if(t.id === 'importFile' && t.files && t.files[0]){ importData(t.files[0]); t.value = ''; return; }
-    if(t.dataset && t.dataset.done){
-      var pt = getPT(state.ptId); if(!pt) return;
-      pt.notes.forEach(function(n){ if(n.id === t.dataset.done) n.done = t.checked; });
-      save(); renderList();
+    if(t.name === 'tipo' && t.form && t.form.id === 'noteForm'){
+      state.tipo = t.value;
+      document.getElementById('campos').innerHTML = camposHTML(t.value, {});
+      return;
+    }
+    if(t.dataset && t.dataset.pt === 'prov'){
+      var p = getPT(state.ptId); if(!p) return;
+      p.prov = t.value; save();
+      document.getElementById('sub').textContent = (p.linea || 'Sin línea') + (p.prov ? ' · ' + p.prov : '');
     }
   });
 
@@ -521,17 +829,18 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
     var f = e.target;
 
     if(f.id === 'ptForm'){
-      var nameInput = f.querySelector('input[name="ptname"]');
-      var name = nameInput ? nameInput.value.trim() : '';
-      if(!name){ if(nameInput) nameInput.focus(); return; }
-      var found = data.pts.filter(function(p){ return p.name.toLowerCase() === name.toLowerCase(); })[0];
-      if(found){ toast('Ese PT/CD ya existe, se abre'); }
+      var el0 = f.elements;
+      var name = el0.ptname.value.trim();
+      if(!name){ el0.ptname.focus(); return; }
+      var found = data.pts.filter(function(p){ return normCD(p.name) === normCD(name); })[0];
+      if(found){ toast('Ese centro ya existe, se abre'); }
       else{
-        found = { id: uid(), name: name, created: Date.now(), notes: [] };
-        data.pts.push(found); save();
+        found = { id: uid(), name: name, linea: el0.linea.value.trim(), prov: el0.prov.value,
+                  created: Date.now(), finished: null, notes: [] };
+        data.pts.push(found); data.prov = found.prov || data.prov; save();
       }
       state.view = 'pt'; state.ptId = found.id; state.filter = 'all'; state.editId = null;
-      state.salida = ''; state.cat = 'sec'; render(); window.scrollTo(0,0);
+      state.tipo = 'sec'; render(); window.scrollTo(0,0);
       return;
     }
 
@@ -540,26 +849,39 @@ h2,h3,.btn,.back,.wa-mini{font-family:"Barlow", "Segoe UI", system-ui, sans-seri
       var el = f.elements;
       var apoyo = el.apoyo.value.trim();
       if(!apoyo){ el.apoyo.focus(); return; }
-      var catSel = f.querySelector('input[name="cat"]:checked');
-      var vals = {
-        apoyo: apoyo,
-        salida: el.salida.value.trim(),
-        inicio: el.inicio.value.trim(),
-        final: el.final.value.trim(),
-        cat: catSel ? catSel.value : 'sec',
-        text: el.text.value.trim()
-      };
+      var tsel = f.querySelector('input[name="tipo"]:checked');
+      var tipo = tsel ? tsel.value : 'sec';
+      var vals = { tipo: tipo, apoyo: apoyo };
+
+      if(tipo === 'sec'){
+        vals.appsec = el.appsec.value; vals.realsec = el.realsec.value;
+      }else if(tipo === 'comp'){
+        vals.rows = Array.prototype.map.call(f.querySelectorAll('#rows .rowsal'), function(r){
+          return { sal: r.querySelector('[name="sal"]').value, sec: r.querySelector('[name="rsec"]').value };
+        });
+      }else if(tipo === 'def'){
+        vals.appdef = el.appdef.value; vals.realdef = el.realdef.value;
+      }else{
+        vals.text = el.text.value.trim();
+        if(!vals.text){ el.text.focus(); toast('Escribe la aclaración'); return; }
+      }
+
       if(state.editId){
-        pt.notes.forEach(function(n){ if(n.id === state.editId){ for(var k in vals) n[k] = vals[k]; } });
+        pt.notes.forEach(function(n){
+          if(n.id === state.editId){
+            ['appsec','realsec','rows','appdef','realdef','text'].forEach(function(k){ delete n[k]; });
+            for(var k in vals) n[k] = vals[k];
+          }
+        });
         state.editId = null; toast('Cambios guardados');
       }else{
-        vals.id = uid(); vals.ts = Date.now(); vals.done = false;
+        vals.id = uid(); vals.ts = Date.now();
         pt.notes.push(vals); toast('Anotación añadida');
       }
-      state.salida = vals.salida; state.cat = vals.cat;
+      state.tipo = tipo;
       save(); renderPT();
       var next = document.querySelector('#noteForm input[name="apoyo"]');
-      if(next && !state.editId) next.focus();
+      if(next) next.focus();
     }
   });
 
